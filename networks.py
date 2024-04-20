@@ -78,11 +78,6 @@ class cGAN:
                 d_loss_fake = criterion(self.D(fake,fake_seqlabel),fake_label)
 
                 d_loss = d_loss_fake + d_loss_real
-
-                if self.use_spectral: 
-                    sp_loss = self.spectral_loss(real_seq,fake)
-                    d_loss += 0.5 * sp_loss
-
                 d_loss.backward()
 
                 self.d_optimizer.step()

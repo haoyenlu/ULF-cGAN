@@ -126,8 +126,7 @@ class Discriminator(nn.Module):
     
     def forward(self,x,label):
         c = self.embedding(label).unsqueeze(1).expand(-1,self.features,-1)
-        print(c.shape,x.shape)
-        _x = torch.cat([x,c],dim=1)
+        _x = torch.cat([x,c],dim=2)
         _x = self.first(_x)
         _x = self.first_conv(_x)
         _x = self.block1(_x)

@@ -17,8 +17,8 @@ if __name__ == '__main__':
         parser.add_argument('--sample_size',type=int,help="Sample Size",default=200)
 
         ''' GAN model '''
-        parser.add_argument('--g_hidden',type=int,help="Generator hidden channel size",default=64)
-        parser.add_argument('--d_hidden',type=int,help="Discriminator hidden channel size",default=64)
+        parser.add_argument('--g_hidden',type=int,help="Generator hidden channel size",default=50)
+        parser.add_argument('--d_hidden',type=int,help="Discriminator hidden channel size",default=50)
         parser.add_argument('--n_critic',type=int,help="Number of iterations for Discriminator per one Generator iterations",default=5)
 
 
@@ -31,7 +31,7 @@ if __name__ == '__main__':
         train_data = numpy_data['data']
         train_label = numpy_data['label']
         feat,seq_len = train_data[0].shape
-        
+
         dataset  = []
         for data,label in zip(train_data,train_label):
                 dataset.append([train_data,train_label])
@@ -43,9 +43,10 @@ if __name__ == '__main__':
 
         model = cGAN(seq_len = seq_len, features=feat,n_critic=args.n_critic,
                 g_hidden=args.g_hidden,d_hidden=args.d_hidden,max_iters=args.max_iter,
-                saveDir=args.saveDir,ckptPath=args.ckpt,prefix=args.task,)
+                saveDir=args.saveDir,ckptPath=args.ckpt,prefix=args.task)
 
 
         model.train(dataloader)
 
         sample = model.generate_samples(args.sample_size)
+        np.save(f"{args.sampleDir}/eegGAN{args.g_hidden}{args.d_hidden}_{args.task}_samples.npy",sample)

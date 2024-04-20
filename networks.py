@@ -38,8 +38,8 @@ class cGAN:
         self.prefix = prefix
 
     def train(self,dataloader):
-        summaryx(self.G,torch.zeros(2,self.seq_len,device=self.device),torch.zeros(2,self.label_dim,dtype=torch.long,device=self.device))
-        summaryx(self.D,torch.zeros(2,self.features,self.seq_len,device=self.device),torch.zeros(2,self.label_dim,dtype=torch.long,device=self.device))
+        summaryx(self.G,torch.zeros(2,self.seq_len,device=self.device),torch.zeros(2,dtype=torch.long,device=self.device))
+        summaryx(self.D,torch.zeros(2,self.features,self.seq_len,device=self.device),torch.zeros(2,dtype=torch.long,device=self.device))
         
 
         data = self.get_infinite_batch(dataloader)

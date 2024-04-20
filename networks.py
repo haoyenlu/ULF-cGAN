@@ -72,7 +72,7 @@ class cGAN:
                 d_loss_real = criterion(self.D(real_seq,real_seqlabel),real_label)
 
                 z = torch.randn(batch_size,1,self.seq_len).to(self.device)
-                fake_seqlabel = torch.randint(low=0,high=self.label_dim,size=batch_size)
+                fake_seqlabel = torch.randint(low=0,high=self.label_dim,size=(batch_size,))
 
                 fake = self.G(z,fake_seqlabel)  
                 d_loss_fake = criterion(self.D(fake,fake_seqlabel),fake_label)
@@ -92,7 +92,7 @@ class cGAN:
             self.D.zero_grad()
 
             z = torch.randn(batch_size,1,self.seq_len).to(self.device)
-            fake_seqlabel = torch.randint(low=0,high=self.label_dim,size=batch_size)
+            fake_seqlabel = torch.randint(low=0,high=self.label_dim,size=(batch_size,))
             fake = self.G(z,fake_seqlabel)
             g_loss = criterion(self.D(fake,fake_seqlabel),real_label)
             g_loss.backward()

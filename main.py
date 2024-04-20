@@ -48,5 +48,6 @@ if __name__ == '__main__':
 
         model.train(dataloader)
 
-        sample = model.generate_samples(args.sample_size)
-        np.save(f"{args.sampleDir}/eegGAN{args.g_hidden}{args.d_hidden}_{args.task}_samples.npy",sample)
+        sample,label = model.generate_samples(args.sample_size)
+        np.save(f"{args.sampleDir}/cGAN{args.g_hidden}{args.d_hidden}_{args.task}_samples.npy",
+                {'sequence':sample,'label':label})

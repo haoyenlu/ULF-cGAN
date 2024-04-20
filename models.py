@@ -59,7 +59,7 @@ class Generator(nn.Module):
         return nn.Sequential(*block)
 
     def forward(self,noise,fake_label):
-        c = self.embedding(fake_label).unsqueeze(1)
+        c = self.embedding(fake_label)
         print(c.shape)
         out = torch.cat([noise,c],dim=2)
         out = self.fc1(out)

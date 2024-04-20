@@ -60,9 +60,7 @@ class Generator(nn.Module):
 
     def forward(self,noise,fake_label):
         c = self.embedding(fake_label)
-        print(c.shape)
         out = torch.cat([noise,c],dim=1)
-        print(out.shape)
         out = self.fc1(out)
         out = torch.reshape(out,(-1,self.hidden_dim,self.sequence_len//64))
         out = self.block1(out)
@@ -128,7 +126,7 @@ class Discriminator(nn.Module):
     
     def forward(self,x,label):
         c = self.embedding(label).unsqueeze(1).expand(-1,self.features,-1)
-        _x = torch.cat([x,c],dim=2)
+        _x = torch.cat([x,c],dim=1)
         _x = self.first(_x)
         _x = self.first_conv(_x)
         _x = self.block1(_x)

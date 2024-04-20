@@ -34,7 +34,7 @@ if __name__ == '__main__':
 
         dataset  = []
         for data,label in zip(train_data,train_label):
-                dataset.append([train_data,train_label])
+                dataset.append([data,label])
 
         dataloader = torch.utils.data.DataLoader(dataset,args.batch_size,shuffle=True)
 

@@ -37,8 +37,8 @@ class cGAN:
         self.prefix = prefix
 
     def train(self,dataloader):
-        summary(self.G,[(1,1,self.seq_len),(1,self.label_dim)])
-        summary(self.D,[(1,self.features,self.seq_len),(1,self.label_dim)])
+        summary(self.G,[(2,1,self.seq_len),2])
+        summary(self.D,[(2,self.features,self.seq_len),2])
         
 
         data = self.get_infinite_batch(dataloader)

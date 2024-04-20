@@ -59,8 +59,8 @@ class Generator(nn.Module):
         return nn.Sequential(*block)
 
     def forward(self,noise,fake_label):
-        c = self.embedding(fake_label)
-        out = torch.cat([noise,c],dim=1)
+        c = self.embedding(fake_label).unsqueeze(1)
+        out = torch.cat([noise,c],dim=2)
         out = self.fc1(out)
         out = torch.reshape(out,(-1,self.hidden_dim,self.sequence_len//64))
         out = self.block1(out)

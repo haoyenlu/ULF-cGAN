@@ -38,8 +38,8 @@ class cGAN:
         self.prefix = prefix
 
     def train(self,dataloader):
-        summaryx(self.G,torch.zeros(2,self.seq_len),torch.zeros(2,self.label_dim))
-        summaryx(self.D,torch.zeros(2,self.features,self.seq_len),torch.zeros(2,self.label_dim))
+        summaryx(self.G,torch.zeros(2,self.seq_len),torch.zeros(2,self.label_dim,dtype=torch.long))
+        summaryx(self.D,torch.zeros(2,self.features,self.seq_len),torch.zeros(2,self.label_dim,dtype=torch.long))
         
 
         data = self.get_infinite_batch(dataloader)
@@ -62,7 +62,7 @@ class cGAN:
                 
                 sequence , label = data.__next__()
                 real_seq = torch.autograd.Variable(sequence).float().to(self.device)
-                real_seqlabel = torch.autograd.Variable(label).float().to(self.device)
+                real_seqlabel = torch.autograd.Variable(label).long().to(self.device)
 
                 batch_size = real_seq.size(0)
 

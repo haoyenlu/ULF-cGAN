@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 from torchsummary import summary
+from torchsummaryX import summary as summaryx
 
 from models import Generator, Discriminator
 
@@ -37,8 +38,8 @@ class cGAN:
         self.prefix = prefix
 
     def train(self,dataloader):
-        summary(self.G,[(2,1,self.seq_len),(2,1)])
-        summary(self.D,[(2,self.features,self.seq_len),(2,1)])
+        summaryx(self.G,torch.zeros(2,self.seq_len),torch.zeros(2,self.label_dim))
+        summaryx(self.D,torch.zeros(2,self.features,self.seq_len),torch.zeros(2,self.label_dim))
         
 
         data = self.get_infinite_batch(dataloader)

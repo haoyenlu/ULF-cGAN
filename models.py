@@ -60,6 +60,7 @@ class Generator(nn.Module):
 
     def forward(self,noise,fake_label):
         c = self.embedding(fake_label).unsqueeze(1)
+        print(c.shape)
         out = torch.cat([noise,c],dim=2)
         out = self.fc1(out)
         out = torch.reshape(out,(-1,self.hidden_dim,self.sequence_len//64))

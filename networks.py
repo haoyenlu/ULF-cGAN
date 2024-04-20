@@ -14,8 +14,8 @@ class cGAN:
         print("Train on {}".format(self.device))
 
     
-        self.G = Generator(seq_len,features,g_hidden).to(self.device)
-        self.D = Discriminator(seq_len,features,d_hidden).to(self.device)
+        self.G = Generator(seq_len,features,g_hidden,label_dim=label_dim).to(self.device)
+        self.D = Discriminator(seq_len,features,d_hidden,label_dim=label_dim).to(self.device)
 
         self.load_ckpt(ckptPath)
 
@@ -27,6 +27,7 @@ class cGAN:
 
         self.seq_len = seq_len
         self.features = features
+        self.label_dim = label_dim
 
         self.sample_size = 2
         self.max_iters = max_iters
@@ -36,8 +37,8 @@ class cGAN:
         self.prefix = prefix
 
     def train(self,dataloader):
-        summary(self.G,(1,self.seq_len))
-        summary(self.D,(self.features,self.seq_len))
+        summary(self.G,[(1,self.seq_len),(self.label_dim)])
+        summary(self.D,[(self.features,self.seq_len),(self.label_dim)])
         
 
         data = self.get_infinite_batch(dataloader)
@@ -70,8 +71,8 @@ class cGAN:
                 d_loss_real = criterion(self.D(real_seq,real_seqlabel),real_label)
 
                 z = torch.randn(batch_size,1,self.seq_len).to(self.device)
-                fake_seqlabel = torch.randint(low=0,high=5,size=batch_size)
-                
+                fake_seqlabel = torch.randint(low=0,high=self.label_dim,size=batch_size)
+
                 fake = self.G(z,fake_seqlabel)  
                 d_loss_fake = criterion(self.D(fake,fake_seqlabel),fake_label)
 
@@ -90,7 +91,7 @@ class cGAN:
             self.D.zero_grad()
 
             z = torch.randn(batch_size,1,self.seq_len).to(self.device)
-            fake_seqlabel = torch.randint(low=0,high=5,size=batch_size)
+            fake_seqlabel = torch.randint(low=0,high=self.label_dim,size=batch_size)
             fake = self.G(z,fake_seqlabel)
             g_loss = criterion(self.D(fake,fake_seqlabel),real_label)
             g_loss.backward()

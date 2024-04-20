@@ -57,23 +57,28 @@ class cGAN:
             for d_iter in range(self.n_critic):
                 self.D.zero_grad()
                 self.G.zero_grad()
+                
+                sequence , label = data.__next__()
+                real_seq = torch.autograd.Variable(sequence).float().to(self.device)
+                real_seqlabel = torch.autograd.Variable(label).float().to(self.device)
 
-                real = torch.autograd.Variable(data.__next__()).float().to(self.device)
-                batch_size = real.size(0)
+                batch_size = real_seq.size(0)
 
                 real_label = torch.autograd.Variable(torch.Tensor(batch_size, 1).fill_(1), requires_grad=False).to(self.device)
                 fake_label = torch.autograd.Variable(torch.Tensor(batch_size, 1).fill_(0), requires_grad=False).to(self.device)
 
-                d_loss_real = criterion(self.D(real),real_label)
+                d_loss_real = criterion(self.D(real_seq,real_seqlabel),real_label)
 
                 z = torch.randn(batch_size,1,self.seq_len).to(self.device)
-                fake = self.G(z)  
-                d_loss_fake = criterion(self.D(fake),fake_label)
+                fake_seqlabel = torch.randint(low=0,high=5,size=batch_size)
+                
+                fake = self.G(z,fake_seqlabel)  
+                d_loss_fake = criterion(self.D(fake,fake_seqlabel),fake_label)
 
                 d_loss = d_loss_fake + d_loss_real
 
                 if self.use_spectral: 
-                    sp_loss = self.spectral_loss(real,fake)
+                    sp_loss = self.spectral_loss(real_seq,fake)
                     d_loss += 0.5 * sp_loss
 
                 d_loss.backward()
@@ -85,8 +90,9 @@ class cGAN:
             self.D.zero_grad()
 
             z = torch.randn(batch_size,1,self.seq_len).to(self.device)
-            fake = self.G(z)
-            g_loss = criterion(self.D(fake),real_label)
+            fake_seqlabel = torch.randint(low=0,high=5,size=batch_size)
+            fake = self.G(z,fake_seqlabel)
+            g_loss = criterion(self.D(fake,fake_seqlabel),real_label)
             g_loss.backward()
 
             self.g_optimizer.step()

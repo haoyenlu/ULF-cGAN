@@ -69,15 +69,17 @@ class cGAN:
                 real_label = torch.autograd.Variable(torch.Tensor(batch_size, 1).fill_(1), requires_grad=False).to(self.device)
                 fake_label = torch.autograd.Variable(torch.Tensor(batch_size, 1).fill_(0), requires_grad=False).to(self.device)
 
-                d_loss_real = criterion(self.D(real_seq,real_seqlabel),real_label)
+                # d_loss_real = criterion(self.D(real_seq,real_seqlabel),real_label)
+                d_loss_real = self.D(real_seq,real_seqlabel).mean()
 
                 z = torch.randn(batch_size,1,self.seq_len).to(self.device)
                 fake_seqlabel = torch.randint(low=0,high=self.label_dim,size=(batch_size,),device=self.device)
 
                 fake = self.G(z,fake_seqlabel)  
-                d_loss_fake = criterion(self.D(fake,fake_seqlabel),fake_label)
+                # d_loss_fake = criterion(self.D(fake,fake_seqlabel),fake_label)
+                d_loss_fake = self.D(fake,fake_seqlabel).mean()
 
-                d_loss = d_loss_fake + d_loss_real
+                d_loss = d_loss_fake - d_loss_real
                 d_loss.backward()
 
                 self.d_optimizer.step()
@@ -89,7 +91,8 @@ class cGAN:
             z = torch.randn(batch_size,1,self.seq_len).to(self.device)
             fake_seqlabel = torch.randint(low=0,high=self.label_dim,size=(batch_size,),device=self.device)
             fake = self.G(z,fake_seqlabel)
-            g_loss = criterion(self.D(fake,fake_seqlabel),real_label)
+            # g_loss = criterion(self.D(fake,fake_seqlabel),real_label)
+            g_loss = - self.D(fake,fake_seqlabel).mean()
             g_loss.backward()
 
             self.g_optimizer.step()

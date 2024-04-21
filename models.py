@@ -84,7 +84,7 @@ class Discriminator(nn.Module):
 
         # self.first = nn.Linear(sequence_len + label_dim,sequence_len)
 
-        self.first_conv = nn.Conv1d(in_features,hidden_dim,label_dim,padding="same")
+        self.first_conv = nn.Conv1d(in_features,hidden_dim,kernel_size=label_dim)
 
         self.block1 = nn.Sequential(
             self.make_conv1d_block(hidden_dim,hidden_dim,downsample=False),

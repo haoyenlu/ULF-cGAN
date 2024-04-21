@@ -42,7 +42,9 @@ class Generator(nn.Module):
         )
 
 
-        self.last = nn.Conv1d(hidden_dim,out_features,kernel_size=5,padding="same")
+        self.last = nn.Sequential(
+            nn.Conv1d(hidden_dim,out_features,kernel_size=5,padding="same"),
+            nn.Sigmoid())
 
 
 
@@ -111,8 +113,9 @@ class Discriminator(nn.Module):
             self.make_conv1d_block(hidden_dim,hidden_dim,downsample=True)
         )
 
-        self.last = nn.Linear(hidden_dim*sequence_len//64,1)
-        self.sigmoid = nn.Sigmoid()
+        self.last = nn.Sequential(
+            nn.Linear(hidden_dim*sequence_len//64,1),
+        )
 
     def make_conv1d_block(self,in_channel,out_channel,kernel=3,downsample=False):
         block = []
@@ -137,5 +140,4 @@ class Discriminator(nn.Module):
         _x = self.block6(_x)
         _x = torch.flatten(_x,start_dim=1)
         _x = self.last(_x)
-        _x = self.sigmoid(_x)
         return _x

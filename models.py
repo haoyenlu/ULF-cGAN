@@ -82,9 +82,9 @@ class Discriminator(nn.Module):
         
         self.embedding = nn.Embedding(label_dim,label_dim)
 
-        self.first = nn.Linear(sequence_len + label_dim,sequence_len)
+        # self.first = nn.Linear(sequence_len + label_dim,sequence_len)
 
-        self.first_conv = nn.Conv1d(in_features,hidden_dim,3,padding="same")
+        self.first_conv = nn.Conv1d(in_features,hidden_dim,label_dim,padding="same")
 
         self.block1 = nn.Sequential(
             self.make_conv1d_block(hidden_dim,hidden_dim,downsample=False),
@@ -127,7 +127,7 @@ class Discriminator(nn.Module):
     def forward(self,x,label):
         c = self.embedding(label).unsqueeze(1).expand(-1,self.features,-1)
         _x = torch.cat([x,c],dim=2)
-        _x = self.first(_x)
+        # _x = self.first(_x)
         _x = self.first_conv(_x)
         _x = self.block1(_x)
         _x = self.block2(_x)

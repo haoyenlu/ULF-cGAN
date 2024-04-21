@@ -43,8 +43,7 @@ class Generator(nn.Module):
 
 
         self.last = nn.Sequential(
-            nn.Conv1d(hidden_dim,out_features,kernel_size=5,padding="same"),
-            nn.Sigmoid())
+            nn.Conv1d(hidden_dim,out_features,kernel_size=5,padding="same"))
 
 
 
@@ -84,7 +83,6 @@ class Discriminator(nn.Module):
         
         self.embedding = nn.Embedding(label_dim,label_dim)
 
-        # self.first = nn.Linear(sequence_len + label_dim,sequence_len)
 
         self.first_conv = nn.Conv1d(in_features,hidden_dim,kernel_size=label_dim + 1,padding=0,stride=1)
 

@@ -7,15 +7,17 @@ from models import Generator, Discriminator
 
 class cGAN:
     def __init__(self,seq_len,features=3,n_critic=3,lr=5e-4,
-                 g_hidden=50,d_hidden=50,max_iters=1000,
-                 label_dim=5,
+                 g_hidden=50,d_hidden=50,max_iters=1000,latent_dim=200,
+                 label_dim=5, w_loss = False,
                  saveDir=None,ckptPath=None,prefix="T01"):
         
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         print("Train on {}".format(self.device))
 
+        self.w_loss = w_loss
+
     
-        self.G = Generator(seq_len,features,g_hidden,label_dim=label_dim).to(self.device)
+        self.G = Generator(seq_len,features,g_hidden,label_dim=label_dim,latent_dim=latent_dim).to(self.device)
         self.D = Discriminator(seq_len,features,d_hidden,label_dim=label_dim).to(self.device)
 
         self.load_ckpt(ckptPath)
@@ -29,6 +31,7 @@ class cGAN:
         self.seq_len = seq_len
         self.features = features
         self.label_dim = label_dim
+        self.latent_dim = latent_dim
 
         self.sample_size = 2
         self.max_iters = max_iters
@@ -43,11 +46,6 @@ class cGAN:
         
 
         data = self.get_infinite_batch(dataloader)
-        batch_size = 4
-
-        
-        criterion = nn.BCELoss()
-
 
         for g_iter in range(self.max_iters):
             for p in self.D.parameters():
@@ -65,34 +63,24 @@ class cGAN:
                 real_seqlabel = torch.autograd.Variable(label).long().to(self.device)
 
                 batch_size = real_seq.size(0)
-
-                real_label = torch.autograd.Variable(torch.Tensor(batch_size, 1).fill_(1), requires_grad=False).to(self.device)
-                fake_label = torch.autograd.Variable(torch.Tensor(batch_size, 1).fill_(0), requires_grad=False).to(self.device)
-
-                # d_loss_real = criterion(self.D(real_seq,real_seqlabel),real_label)
-                d_loss_real = self.D(real_seq,real_seqlabel).mean()
-
-                z = torch.randn(batch_size,1,self.seq_len).to(self.device)
+                z = torch.randn(batch_size,1,self.latent_dim).to(self.device)
                 fake_seqlabel = torch.randint(low=0,high=self.label_dim,size=(batch_size,),device=self.device)
 
                 fake = self.G(z,fake_seqlabel)  
-                # d_loss_fake = criterion(self.D(fake,fake_seqlabel),fake_label)
-                d_loss_fake = self.D(fake,fake_seqlabel).mean()
 
-                d_loss = d_loss_fake - d_loss_real
+                d_loss = self._get_critic_loss(self.D(fake,fake_seqlabel),self.D(real_seq,real_seqlabel))
                 d_loss.backward()
 
                 self.d_optimizer.step()
-                print(f'Discriminator iteration: {d_iter}/{self.n_critic}, loss_fake: {d_loss_fake}, loss_real: {d_loss_real}')
+                print(f'Discriminator iteration: {d_iter}/{self.n_critic}, Discriminator Loss: {d_loss}')
 
             self.G.zero_grad()
             self.D.zero_grad()
 
-            z = torch.randn(batch_size,1,self.seq_len).to(self.device)
+            z = torch.randn(batch_size,1,self.latent_dim).to(self.device)
             fake_seqlabel = torch.randint(low=0,high=self.label_dim,size=(batch_size,),device=self.device)
             fake = self.G(z,fake_seqlabel)
-            # g_loss = criterion(self.D(fake,fake_seqlabel),real_label)
-            g_loss = - self.D(fake,fake_seqlabel).mean()
+            g_loss = self._get_generator_loss(self.D(fake,fake_seqlabel))
             g_loss.backward()
 
             self.g_optimizer.step()
@@ -107,6 +95,33 @@ class cGAN:
         self.save_model()
         print("Finished Training!!")
     
+
+    def _get_critic_loss(self,fake_prediction,real_prediction):
+        batch_size = fake_prediction.size(0)
+
+        if self.w_loss == False: 
+            real_label = torch.autograd.Variable(torch.Tensor(batch_size, 1).fill_(1), requires_grad=False).to(self.device)
+            fake_label = torch.autograd.Variable(torch.Tensor(batch_size, 1).fill_(0), requires_grad=False).to(self.device)
+
+            loss_fake = nn.functional.binary_cross_entropy_with_logits(fake_prediction,fake_label)
+            loss_real = nn.functional.binary_cross_entropy_with_logits(real_prediction,real_label)
+            loss_d = loss_fake + loss_real
+        else:
+            loss_d = fake_prediction.mean() - real_prediction.mean()
+        
+        return loss_d
+
+    def _get_generator_loss(self,prediction):
+        batch_size = prediction.size(0)
+
+        if self.w_loss == False:
+            real_label = torch.autograd.Variable(torch.Tensor(batch_size, 1).fill_(1), requires_grad=False).to(self.device)
+            g_loss = nn.functional.binary_cross_entropy_with_logits(prediction,real_label)
+        else:
+            g_loss = prediction.mean()
+        
+        return g_loss
+
 
     def load_ckpt(self,ckptPath):
         if ckptPath:

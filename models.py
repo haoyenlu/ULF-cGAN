@@ -2,17 +2,18 @@ import torch
 import torch.nn as nn
 
 class Generator(nn.Module):
-    def __init__(self,sequence_len,out_features,hidden_dim=50,label_dim=5):
+    def __init__(self,sequence_len,out_features,hidden_dim=50,latent_dim=200,label_dim=5):
         super().__init__()
         self.sequence_len = sequence_len
         self.out_features = out_features
         self.hidden_dim = hidden_dim
         self.label_dim = label_dim
+        self.latent_dim = latent_dim
 
         self.embedding = nn.Embedding(label_dim,label_dim)
 
         self.fc1 = nn.Sequential(
-            nn.Linear(sequence_len + label_dim,(sequence_len//64) * hidden_dim,bias=False),
+            nn.Linear(latent_dim + label_dim,(sequence_len//64) * hidden_dim,bias=False),
             nn.LeakyReLU(0.2)
         )
 
@@ -43,7 +44,9 @@ class Generator(nn.Module):
 
 
         self.last = nn.Sequential(
-            nn.Conv1d(hidden_dim,out_features,kernel_size=5,padding="same"))
+            nn.Conv1d(hidden_dim,out_features,kernel_size=5,padding="same"),
+            nn.Tanh()
+        )
 
 
 

@@ -20,6 +20,7 @@ if __name__ == '__main__':
         parser.add_argument('--g_hidden',type=int,help="Generator hidden channel size",default=50)
         parser.add_argument('--d_hidden',type=int,help="Discriminator hidden channel size",default=50)
         parser.add_argument('--n_critic',type=int,help="Number of iterations for Discriminator per one Generator iterations",default=5)
+        parser.add_argument('--use_wloss',action="store_true")
 
 
 
@@ -42,7 +43,7 @@ if __name__ == '__main__':
         print(f"Features:{feat},Sequence Length:{seq_len}")
 
         model = cGAN(seq_len = seq_len, features=feat,n_critic=args.n_critic,
-                g_hidden=args.g_hidden,d_hidden=args.d_hidden,max_iters=args.max_iter,
+                g_hidden=args.g_hidden,d_hidden=args.d_hidden,max_iters=args.max_iter,w_loss=args.use_wloss,
                 saveDir=args.saveDir,ckptPath=args.ckpt,prefix=args.task)
 
 

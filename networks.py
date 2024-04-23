@@ -132,7 +132,7 @@ class cGAN:
 
 
     def generate_samples(self,sample_size):
-        z = torch.randn(sample_size,1,self.seq_len).to(self.device)
+        z = torch.randn(sample_size,1,self.latent_dim).to(self.device)
         label = torch.randint(low=0,high=self.label_dim,size=(sample_size,),device=self.device)
         fakes = self.G(z,label).detach().cpu().numpy()
         

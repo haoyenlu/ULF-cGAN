@@ -6,7 +6,7 @@ from torchsummaryX import summary as summaryx
 from models import Generator, Discriminator
 
 class cGAN:
-    def __init__(self,seq_len,features=3,n_critic=3,lr=5e-4,
+    def __init__(self,seq_len,features=3,n_critic=3,g_lr=5e-4,d_lr=5e-4,
                  g_hidden=50,d_hidden=50,max_iters=1000,latent_dim=200,
                  label_dim=5, w_loss = False,
                  saveDir=None,ckptPath=None,prefix="T01"):
@@ -22,11 +22,12 @@ class cGAN:
 
         self.load_ckpt(ckptPath)
 
-        self.lr = lr
+        self.g_lr = g_lr
+        self.d_lr = d_lr
         self.n_critic = n_critic
 
-        self.g_optimizer = torch.optim.RMSprop(self.G.parameters(),lr=self.lr)
-        self.d_optimizer = torch.optim.RMSprop(self.D.parameters(),lr=self.lr)
+        self.g_optimizer = torch.optim.Adam(self.G.parameters(),lr=self.g_lr)
+        self.d_optimizer = torch.optim.Adam(self.D.parameters(),lr=self.d_lr)
 
         self.seq_len = seq_len
         self.features = features
